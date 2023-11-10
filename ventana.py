@@ -4,26 +4,6 @@ from tkinter import messagebox
 from time import sleep
 from pruebasMultiples import*
 
-def capturarDatos():
-    ip = ip_textbox.get()
-    region = region_opciones.get()
-    if ip != "" and region != "":
-        for i in [AnchoB_result, Latencia_result, PerdidaP_result]:
-            i.config(text="Cargando...")
-
-        rAnchoB = pruebaST(ip, region)
-        AnchoB_result.config(text=f"Descarga: {str(round(rAnchoB[0], 2))} MBps\nSubida: {str(round(rAnchoB[1], 2))} MBps")
-        Latencia_result.config(text=f"{str(round(pruebaLatencia(ip, region), 4))} msec")
-        PerdidaP_result.config(text=f"{pruebaPPaquetes(ip, region)} paquetes perdidos")
-    else:
-        tkinter.messagebox.showwarning("Error", "Complete los campos requeridos")
-
-def hiloCD():
-    sleep(1)
-    import threading as t
-    x = t.Thread(target=lambda: capturarDatos())
-    x.start()
-
 window = tkinter.Tk()
 window.title("PROYECTO FINAL: REDES DE COMPUTADORAS")
 
@@ -65,7 +45,6 @@ def mostrar_siguiente_frame_GIF1(frame_index):
 mostrar_siguiente_frame_GIF1(0)
 
 
-
 input_frame = tkinter.LabelFrame(frame, text = "  Ingreso de datos  ", bg="#FFFFFF")
 input_frame.grid(row = 1, column = 0, sticky="news", padx= 12, pady=2)
 
@@ -73,8 +52,8 @@ input_frame.grid(row = 1, column = 0, sticky="news", padx= 12, pady=2)
 ip_label = tkinter.Label(input_frame, text="IP:", bg="#FFFFFF")
 ip_label.grid(row=0,column=0)
 
-
-ip_textbox = tkinter.Entry(input_frame, width=18, bg="#FFFFFF")
+ip = tkinter.StringVar()
+ip_textbox = tkinter.Entry(input_frame, width=18, bg="#FFFFFF", textvariable=ip)
 ip_textbox.grid(row=0, column=1)
 
 
@@ -88,9 +67,65 @@ region_label.grid(row=0, column=3)
 
 region_opciones = ttk.Combobox(input_frame, values=["","Asia","America","Africa","Europa","Oceanía"], width=10, state='readonly')
 region_opciones.grid(row=0, column=4)
+def llenarIP(event):
+    region = region_opciones.get()
+    ip_var:str
+    if region == "America":
+        ip_var = "18.220.109.253" # Instancia EC2 en NA
+    elif region == "Europa":
+        ip_var = "62.210.18.40" # CAMBIAR POR INSTANCIA EC2
+    elif region == "Asia":
+        ip_var = "117.102.109.186" # CAMBIAR POR INSTANCIA EC2
+    elif region == "Oceania":
+        ip_var = "117.102.109.186" # CAMBIAR POR INSTANCIA EC2
+    else:
+        ip_var = "127.0.0.1"
+    ip.set(ip_var)    
+    
+region_opciones.bind('<<ComboboxSelected>>', llenarIP)
 
+def testAnchoBanda(ip):
+    try:
+        rAnchoB = pruebaSubidaDescarga(ip)
+        AnchoB_result.config(text=f"Descarga: {rAnchoB[0]}\nSubida: {rAnchoB[1]}")
+    except Exception as Err:
+        messagebox.showwarning("Error", f"La IP no corresponde a un servidor de medida de descarga y subida.\n{Err}")
+        AnchoB_result.config(text="Error")
 
-boton_enviar = tkinter.Button(input_frame, text="          Enviar          ", command=hiloCD)
+def testLatencia(ip):
+    try:
+        Latencia_result.config(text=f"{str(round(pruebaLatencia(ip), 4))} msec")
+    except Exception as Err:
+        messagebox.showwarning("Error", f"Algo salio mal en la prueba de Latencia.\n{Err}")
+        Latencia_result.config(text="Error")
+
+def testPPaquetes(ip):
+    try:
+        loss = pruebaPPaquetes(ip)
+        PerdidaP_result.config(text=f"{loss} paquetes perdidos")
+    except Exception as Err:
+        messagebox.showwarning("Error", f"Algo salio mal en la prueba de pérdida de paquetes.\n{Err}")
+        PerdidaP_result.config(text="Error")
+
+def capturarDatos():
+    sleep(1)
+    ip = ip_textbox.get()
+    region = region_opciones.get()
+    
+    # Si no hay IP
+    if ip == "" and region == "":
+        tkinter.messagebox.showwarning("Error", "Complete los campos requeridos")
+        return
+
+    for i in [AnchoB_result, Latencia_result, PerdidaP_result]:
+            i.config(text="Cargando...")
+    
+    import threading as t
+    t.Thread(target=lambda: testAnchoBanda(ip)).start()
+    t.Thread(target=lambda: testLatencia(ip)).start()
+    t.Thread(target=lambda: testPPaquetes(ip)).start()
+
+boton_enviar = tkinter.Button(input_frame, text="          Enviar          ", command=capturarDatos)
 boton_enviar.grid(row=2, column=2)
 
 
@@ -123,6 +158,5 @@ Latencia_result = tkinter.Label(output_frame, text=" ", bg="#FFFFFF")
 Latencia_result.grid(row=1,column=1, pady= (0,10))
 PerdidaP_result = tkinter.Label(output_frame, text=" ", bg="#FFFFFF")
 PerdidaP_result.grid(row=1, column=2, pady= (0,10))
-
 
 window.mainloop()
