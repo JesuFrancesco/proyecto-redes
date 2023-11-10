@@ -71,9 +71,9 @@ def llenarIP(event):
     region = region_opciones.get()
     ip_var:str
     if region == "America":
-        ip_var = "18.220.109.253" # Instancia EC2 en NA
+        ip_var = "18.220.109.253" # Instancia EC2 en NA (Ohio)
     elif region == "Europa":
-        ip_var = "62.210.18.40" # CAMBIAR POR INSTANCIA EC2
+        ip_var = "52.16.98.249" # Instancia EC2 en EU (Irlanda)
     elif region == "Asia":
         ip_var = "117.102.109.186" # CAMBIAR POR INSTANCIA EC2
     elif region == "Oceania":
@@ -89,14 +89,14 @@ def testAnchoBanda(ip):
         rAnchoB = pruebaSubidaDescarga(ip)
         AnchoB_result.config(text=f"Descarga: {rAnchoB[0]}\nSubida: {rAnchoB[1]}")
     except Exception as Err:
-        messagebox.showwarning("Error", f"La IP no corresponde a un servidor de medida de descarga y subida.\n{Err}")
+        messagebox.showwarning("Error | Prueba de ancho de banda", f"Algo salió mal.\n{Err}")
         AnchoB_result.config(text="Error")
 
 def testLatencia(ip):
     try:
         Latencia_result.config(text=f"{str(round(pruebaLatencia(ip), 4))} msec")
     except Exception as Err:
-        messagebox.showwarning("Error", f"Algo salio mal en la prueba de Latencia.\n{Err}")
+        messagebox.showwarning("Error | Prueba de latencia", f"Algo salio mal.\n{Err}")
         Latencia_result.config(text="Error")
 
 def testPPaquetes(ip):
@@ -104,7 +104,7 @@ def testPPaquetes(ip):
         loss = pruebaPPaquetes(ip)
         PerdidaP_result.config(text=f"{loss} paquetes perdidos")
     except Exception as Err:
-        messagebox.showwarning("Error", f"Algo salio mal en la prueba de pérdida de paquetes.\n{Err}")
+        messagebox.showwarning("Error | Prueba de pérdida de paquetes", f"Algo salio mal.\n{Err}")
         PerdidaP_result.config(text="Error")
 
 def capturarDatos():
@@ -113,8 +113,8 @@ def capturarDatos():
     region = region_opciones.get()
     
     # Si no hay IP
-    if ip == "" and region == "":
-        tkinter.messagebox.showwarning("Error", "Complete los campos requeridos")
+    if ip == "":
+        tkinter.messagebox.showwarning("Error", "Complete la dirección IP")
         return
 
     for i in [AnchoB_result, Latencia_result, PerdidaP_result]:
