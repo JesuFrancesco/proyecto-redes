@@ -4,6 +4,24 @@ from tkinter import messagebox
 from time import sleep
 from pruebasMultiples import*
 
+class resultado:
+    def __init__(self):
+        self.velDescarga = None
+        self.velSubida = None
+        self.latencia = None
+        self.paqPerdidos = None
+
+    def exportar(self):
+        # hacer algo
+        pass
+
+    def rprint(self):
+        print(f"Velocidad de descarga: {self.velDescarga}\n"
+              + f"Velocidad de subida: {self.velSubida}\n"
+              + f"Latencia: {self.latencia}\n"
+              + f"Paquetes perdidos: {self.paqPerdidos}\n")
+
+
 window = tkinter.Tk()
 window.title("PROYECTO FINAL: REDES DE COMPUTADORAS")
 
@@ -71,13 +89,13 @@ def llenarIP(event):
     region = region_opciones.get()
     ip_var:str
     if region == "America":
-        ip_var = "18.220.109.253" # Instancia EC2 en NA (Ohio)
+        ip_var = "13.59.221.185" # Instancia EC2 en NA (Ohio)
     elif region == "Europa":
         ip_var = "52.16.98.249" # Instancia EC2 en EU (Irlanda)
     elif region == "Asia":
-        ip_var = "117.102.109.186" # CAMBIAR POR INSTANCIA EC2
-    elif region == "Oceania":
-        ip_var = "117.102.109.186" # CAMBIAR POR INSTANCIA EC2
+        ip_var = "15.152.47.2" # Instancia EC2 en AS (Osaka)
+    elif region == "Sudamérica":
+        ip_var = "117.102.109.186" # Instancia EC2 en SA (Sao paulo)
     else:
         ip_var = "127.0.0.1"
     ip.set(ip_var)    
@@ -87,14 +105,18 @@ region_opciones.bind('<<ComboboxSelected>>', llenarIP)
 def testAnchoBanda(ip):
     try:
         rAnchoB = pruebaSubidaDescarga(ip)
-        AnchoB_result.config(text=f"Descarga: {rAnchoB[0]}\nSubida: {rAnchoB[1]}")
+        r.velDescarga, r.velSubida = rAnchoB[0], rAnchoB[1]
+        AnchoB_result.config(text=f"Descarga: {str(rAnchoB[0])} MBps\n"
+                                + f"Subida: {str(rAnchoB[1])} MBps")
     except Exception as Err:
         messagebox.showwarning("Error | Prueba de ancho de banda", f"Algo salió mal.\n{Err}")
         AnchoB_result.config(text="Error")
 
 def testLatencia(ip):
     try:
-        Latencia_result.config(text=f"{str(round(pruebaLatencia(ip), 4))} msec")
+        rLatencia = round(pruebaLatencia(ip), 4)
+        r.latencia = rLatencia
+        Latencia_result.config(text=f"{str(rLatencia)} msec")
     except Exception as Err:
         messagebox.showwarning("Error | Prueba de latencia", f"Algo salio mal.\n{Err}")
         Latencia_result.config(text="Error")
@@ -102,18 +124,22 @@ def testLatencia(ip):
 def testPPaquetes(ip):
     try:
         loss = pruebaPPaquetes(ip)
-        PerdidaP_result.config(text=f"{loss} paquetes perdidos")
+        r.paqPerdidos = loss
+        PerdidaP_result.config(text=f"{loss} paquetes perdidos\n"
+                                    + f"(de un total de 10)")
     except Exception as Err:
         messagebox.showwarning("Error | Prueba de pérdida de paquetes", f"Algo salio mal.\n{Err}")
         PerdidaP_result.config(text="Error")
 
 def capturarDatos():
+    global r
+    r = resultado()
+    
     sleep(1)
     ip = ip_textbox.get()
-    region = region_opciones.get()
     
     # Si no hay IP
-    if ip == "":
+    if ip == "" or len(ip.split(".")) != 4:
         tkinter.messagebox.showwarning("Error", "Complete la dirección IP")
         return
 
