@@ -1,11 +1,12 @@
-# Estetica
-# from pprint import pprint
+# Otros módulos
+from time import sleep
 
 # Modulos de red
 from ping3 import ping
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
+from bs4 import BeautifulSoup
 
 def pruebaLatencia(ip:str):
     latencia = ping(dest_addr=ip, unit="ms", ttl=128)
@@ -22,9 +23,6 @@ def pruebaLatencia(ip:str):
 
 # Adaptado de https://github.com/arnavchachra/openspeedtest/blob/main/speedtest.py
 def pruebaSubidaDescarga(ip:str):
-    import time
-    from bs4 import BeautifulSoup
-
     # Preparar clase de driver y ejecutar chrome
     options = Options()
     options.headless = True
@@ -34,14 +32,14 @@ def pruebaSubidaDescarga(ip:str):
     # Verificar e Ir a la página de la IP en puerto 3000
     try: navegador.get(f'http://{ip}:3000/?R')
     except WebDriverException: raise Exception("La IP no corresponde a un servicio de OpenSpeedTest o el puerto rechazó la conexión.") 
-    time.sleep(3)
+    sleep(3)
 
     # Verificar previo si la pagina contiene los elementos
     navegador.find_element(value="upResultC2")
 
     tmp = BeautifulSoup(navegador.page_source, 'html.parser').find(id="upResultC2").get_text().split()[0]
     while tmp == "---":
-        time.sleep(5)
+        sleep(5)
         tmp = BeautifulSoup(navegador.page_source, 'html.parser').find(id="upResultC2").get_text().split()[0]
     
     # Extraer contenido pasado la prueba
@@ -61,7 +59,7 @@ def pruebaSubidaDescarga(ip:str):
 
 def pruebaPPaquetes(ip:str):
     # List comprehension de pings
-    pruebaPing = [ping(dest_addr=ip) for pong in range(10)]
+    pruebaPing = [ping(dest_addr=ip, ttl=58) for pong in range(10)]
     # Filtrar los que fallaron
     pruebaPing = list(filter(lambda pong: pong == None or pong == False , pruebaPing))
     # Retornar numero de fallos (paquetes perdidos)
