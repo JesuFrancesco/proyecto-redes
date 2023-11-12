@@ -42,7 +42,7 @@ title_frame = tkinter.LabelFrame(frame, bg="#FFFFFF")
 title_frame.grid(row = 0, column = 0, sticky="news", padx= 12, pady=(12,2))
 
 
-title_label = tkinter.Label(title_frame, text = "  Analisis de la calidad \n de internet", font=("Courier New", 20, "bold"), bg="#FFFFFF", fg="#333333")
+title_label = tkinter.Label(title_frame, text = "  Análisis de la calidad \n de internet", font=("Courier New", 20, "bold"), bg="#FFFFFF", fg="#333333")
 title_label.grid(row = 0, column = 0 , padx = 21, pady= (10,2))
 
 
@@ -87,23 +87,23 @@ relleno = tkinter.Label(input_frame, text="             ", bg="#FFFFFF")
 relleno.grid(row=0, column=2)
 
 
-region_label = tkinter.Label(input_frame, text="Region:", bg="#FFFFFF")
+region_label = tkinter.Label(input_frame, text="Región:", bg="#FFFFFF")
 region_label.grid(row=0, column=3)
 
 
-region_opciones = ttk.Combobox(input_frame, values=["","Asia","América","Europa"], width=10, state='readonly')
+region_opciones = ttk.Combobox(input_frame, values=["","Asia","América","Europa","Sudamérica"], width=10, state='readonly')
 region_opciones.grid(row=0, column=4)
 def llenarIP(event):
     region = region_opciones.get()
     ip_var:str
     if region == "América":
-        ip_var = "18.189.7.44" # Instancia EC2 en NA (Ohio)
+        ip_var = "18.118.8.61" # Instancia EC2 en NA (Ohio)
     elif region == "Europa":
         ip_var = "52.16.98.249" # Instancia EC2 en EU (Irlanda)
     elif region == "Asia":
-        ip_var = "15.152.47.2" # Instancia EC2 en AS (Osaka)
+        ip_var = "13.208.189.57" # Instancia EC2 en AS (Osaka)
     elif region == "Sudamérica":
-        ip_var = "117.102.109.186" # Instancia EC2 en SA (Sao paulo)
+        ip_var = "54.232.31.234" # Instancia EC2 en SA (Sao paulo)
     else:
         ip_var = "127.0.0.1"
     ip.set(ip_var)    
@@ -114,8 +114,8 @@ def testAnchoBanda(ip):
     try:
         rAnchoB = pruebaSubidaDescarga(ip)
         r.velDescarga, r.velSubida = rAnchoB[0], rAnchoB[1]
-        AnchoB_result.config(text=f"Descarga: {str(rAnchoB[0])} MBps\n"
-                                + f"Subida: {str(rAnchoB[1])} MBps")
+        AnchoB_result.config(text=f"Descarga: {str(rAnchoB[0])} Mbps\n"
+                                + f"Subida: {str(rAnchoB[1])} Mbps")
     except Exception as Err:
         messagebox.showwarning("Error | Prueba de ancho de banda", f"Algo salió mal.\n{Err}")
         AnchoB_result.config(text="Error")
@@ -124,7 +124,7 @@ def testLatencia(ip):
     try:
         rLatencia = round(pruebaLatencia(ip), 4)
         r.latencia = rLatencia
-        Latencia_result.config(text=f"{str(rLatencia)} msec")
+        Latencia_result.config(text=f"{str(rLatencia)} ms")
     except Exception as Err:
         messagebox.showwarning("Error | Prueba de latencia", f"Algo salio mal.\n{Err}")
         Latencia_result.config(text="Error")
@@ -184,7 +184,7 @@ Latencia_label = tkinter.Label(output_frame, text="Latencia:", bg="#FFFFFF")
 Latencia_label.grid(row=0,column=1)
 
 
-PerdidaP_label = tkinter.Label(output_frame, text="Perdida de paquetes:", bg="#FFFFFF")
+PerdidaP_label = tkinter.Label(output_frame, text="Pérdida de paquetes:", bg="#FFFFFF")
 PerdidaP_label.grid(row=0,column=2)
 
 for widget in output_frame.winfo_children():
