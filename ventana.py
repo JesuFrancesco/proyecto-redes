@@ -4,16 +4,24 @@ from tkinter import messagebox
 from time import sleep
 from pruebasMultiples import*
 
+from visualizacion import*
+
 class resultado:
+    
+    contador_instancias = 0
+    lista=[]
+
     def __init__(self):
+        resultado.contador_instancias += 1
+        self.Ejecucion = resultado.contador_instancias
+        self.Servidor=None
         self.velDescarga = None
         self.velSubida = None
         self.latencia = None
         self.paqPerdidos = None
 
-    def exportar(self):
-        # hacer algo
-        pass
+    def añadir(self):
+        resultado.lista.append(self)
 
     def rprint(self):
         print(f"Velocidad de descarga: {self.velDescarga}\n"
@@ -63,7 +71,7 @@ def mostrar_siguiente_frame_GIF1(frame_index):
 mostrar_siguiente_frame_GIF1(0)
 
 
-input_frame = tkinter.LabelFrame(frame, text = "  Ingreso de datos  ", bg="#FFFFFF")
+input_frame = tkinter.LabelFrame(frame, text = "  Seleccionar servidor de prueba  ", bg="#FFFFFF")
 input_frame.grid(row = 1, column = 0, sticky="news", padx= 12, pady=2)
 
 
@@ -83,13 +91,13 @@ region_label = tkinter.Label(input_frame, text="Region:", bg="#FFFFFF")
 region_label.grid(row=0, column=3)
 
 
-region_opciones = ttk.Combobox(input_frame, values=["","Asia","America","Africa","Europa","Oceanía"], width=10, state='readonly')
+region_opciones = ttk.Combobox(input_frame, values=["","Asia","América","Europa"], width=10, state='readonly')
 region_opciones.grid(row=0, column=4)
 def llenarIP(event):
     region = region_opciones.get()
     ip_var:str
-    if region == "America":
-        ip_var = "13.59.221.185" # Instancia EC2 en NA (Ohio)
+    if region == "América":
+        ip_var = "18.189.7.44" # Instancia EC2 en NA (Ohio)
     elif region == "Europa":
         ip_var = "52.16.98.249" # Instancia EC2 en EU (Irlanda)
     elif region == "Asia":
@@ -150,10 +158,16 @@ def capturarDatos():
     t.Thread(target=lambda: testAnchoBanda(ip)).start()
     t.Thread(target=lambda: testLatencia(ip)).start()
     t.Thread(target=lambda: testPPaquetes(ip)).start()
+    r.Servidor= region_opciones.get()
+    r.añadir()
 
-boton_enviar = tkinter.Button(input_frame, text="          Enviar          ", command=capturarDatos)
+def exportarDatos():
+    llamargooglesheets(resultado.lista)
+
+boton_enviar = tkinter.Button(input_frame, text="          Calcular          ", command=capturarDatos)
 boton_enviar.grid(row=2, column=2)
-
+boton_ver = tkinter.Button(input_frame, text="   Visualizar resultados   ", command=exportarDatos)
+boton_ver.grid(row=3, column=2)
 
 for widget in input_frame.winfo_children():
     widget.grid_configure(padx = 10, pady= 7.5)
@@ -172,7 +186,6 @@ Latencia_label.grid(row=0,column=1)
 
 PerdidaP_label = tkinter.Label(output_frame, text="Perdida de paquetes:", bg="#FFFFFF")
 PerdidaP_label.grid(row=0,column=2)
-
 
 for widget in output_frame.winfo_children():
     widget.grid_configure(padx = 32.5, pady= 5)
